@@ -50,7 +50,7 @@ def fetch_sajun_plans():
     
     # 한국 시간 기준 현재 시각 적용
     today = datetime.now(KST)
-    bgn_dt = (today - timedelta(days=2)).strftime('%Y%m%d0000') # 최근 2일 집중 조회
+    bgn_dt = today.strftime('%Y%m%d0000') # 오늘 자정 이후 공고만 조회
     end_dt = today.strftime('%Y%m%d%H%M')
     
     all_items = []
