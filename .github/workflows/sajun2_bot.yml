@@ -4,14 +4,14 @@ on:
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
-  repository_dispatch:  # 👈 이 줄을 꼭 추가해 주셔야 합니다!
+  repository_dispatch:
     types: [run-sajun-bot]
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 👈 이 부분이 반드시 있어야 캐시 파일 자동 저장이 허용됩니다!
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,9 +33,14 @@ jobs:
         run: |
           python sajun_bot.py
 
+      - name: Pull latest changes before commit
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull origin main --rebase || echo "No rebase needed"
+
       - name: Save sent_sajun_ids cache
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update sent_sajun_ids.json"
           file_pattern: "sent_sajun_ids.json"
-          pull_strategy: 'REBASE' # 👈 force 대신 이 줄을 넣어주세요!
