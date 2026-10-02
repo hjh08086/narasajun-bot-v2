@@ -8,6 +8,8 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 👈 이 부분이 반드시 있어야 캐시 파일 자동 저장이 허용됩니다!
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
