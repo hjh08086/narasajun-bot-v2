@@ -4,14 +4,14 @@ on:
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
-  repository_dispatch:  # 👈 이 줄을 꼭 추가해 주셔야 합니다!
+  repository_dispatch:
     types: [run-bot]
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 👈 1. 파일 수정 및 푸시 권한 추가 (필수)
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,7 +33,6 @@ jobs:
         run: |
           python bot.py
 
-      # 👈 2. 캐시를 저장(커밋)하기 직전에 원격 최신 내용을 먼저 받아오도록 추가
       - name: Pull latest changes before commit
         run: |
           git config --global user.name "github-actions[bot]"
@@ -45,4 +44,3 @@ jobs:
         with:
           commit_message: "Auto-update sent_ids.json"
           file_pattern: "sent_ids.json"
-          pull_strategy: 'REBASE' # 👈 이 줄을 추가해 주세요!
