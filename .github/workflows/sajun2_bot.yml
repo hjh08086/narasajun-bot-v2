@@ -1,9 +1,11 @@
 name: Narajangteo Sajun Bot
 
 on:
-  schedule:
-    - cron: '*/10 * * * *'  # 10분마다 실행
+schedule:
+    - cron: '*/10 * * * *'
   workflow_dispatch:
+  repository_dispatch:  # 👈 이 줄을 꼭 추가해 주셔야 합니다!
+    types: [run-bot]
 
 jobs:
   run-bot:
