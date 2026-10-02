@@ -38,4 +38,4 @@ jobs:
         with:
           commit_message: "Auto-update sent_sajun_ids.json"
           file_pattern: "sent_sajun_ids.json"
-          push_options: '--force'
+          pull_strategy: 'REBASE' # 👈 force 대신 이 줄을 넣어주세요!
