@@ -45,3 +45,4 @@ jobs:
         with:
           commit_message: "Auto-update sent_ids.json"
           file_pattern: "sent_ids.json"
+          pull_strategy: 'REBASE' # 👈 이 줄을 추가해 주세요!
