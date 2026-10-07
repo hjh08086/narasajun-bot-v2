@@ -48,11 +48,18 @@ def send_telegram(text):
 def fetch_order_plans():
     url = "https://apis.data.go.kr/1230000/ao/OrderPlanSttusService/getOrderPlanSttusListServcPPSSrch"
     
+    # 한국 시간 기준 오늘 자정부터 현재까지의 기간 설정 추가
+    today = datetime.now(KST)
+    bgn_dt = today.strftime('%Y%m%d0000')  # 오늘 자정 시작
+    end_dt = today.strftime('%Y%m%d%H%M')  # 현재 시간
+    
     params = {
         "serviceKey": SERVICE_KEY,
         "pageNo": "1",
         "numOfRows": "300",
         "inqryDiv": "1",
+        "inqryBgnDt": bgn_dt,  # 조회 시작일 추가
+        "inqryEndDt": end_dt,  # 조회 종료일 추가
         "type": "json"
     }
     
