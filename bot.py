@@ -48,38 +48,63 @@ def send_telegram(text):
 def fetch_order_plans():
     url = "https://apis.data.go.kr/1230000/ao/OrderPlanSttusService/getOrderPlanSttusListServcPPSSrch"
     
-    # 한국 시간 기준 오늘 자정부터 현재까지의 기간 설정 추가
+    # 사전규격과 완전히 똑같이 오늘 자정부터 현재까지 실시간 조회 적용
     today = datetime.now(KST)
-    bgn_dt = today.strftime('%Y%m%d0000')  # 오늘 자정 시작
-    end_dt = today.strftime('%Y%m%d%H%M')  # 현재 시간
+    bgn_dt = today.strftime('%Y%m%d0000')  # 오늘 자정 이후 공고만 조회
+    end_dt = today.strftime('%Y%m%d%H%M')
     
-    params = {
-        "serviceKey": SERVICE_KEY,
-        "pageNo": "1",
-        "numOfRows": "300",
-        "inqryDiv": "1",
-        "inqryBgnDt": bgn_dt,  # 조회 시작일 추가
-        "inqryEndDt": end_dt,  # 조회 종료일 추가
-        "type": "json"
-    }
+    all_items = []
+    page_no = 1
+    num_of_rows = 100  # 한 번에 100개씩 페이지별 호출
     
-    try:
-        res = requests.get(url, params=params, timeout=30)
-        if res.status_code != 200:
-            print("API 오류 상태코드:", res.status_code)
-            return []
-        
-        data = res.json()
-        body = data.get("response", {}).get("body", {})
-        items = body.get("items", [])
-        
-        if not isinstance(items, list):
-            items = [items] if items else []
+    for attempt in range(3):
+        try:
+            while True:
+                params = {
+                    "serviceKey": SERVICE_KEY,
+                    "pageNo": str(page_no),
+                    "numOfRows": str(num_of_rows),
+                    "inqryDiv": "1",
+                    "inqryBgnDt": bgn_dt,
+                    "inqryEndDt": end_dt,
+                    "type": "json"
+                }
+                
+                res = requests.get(url, params=params, timeout=30)
+                if res.status_code != 200:
+                    print(f"API 오류 상태코드: {res.status_code}")
+                    break
+                
+                data = res.json()
+                body = data.get("response", {}).get("body", {})
+                total_count = body.get("totalCount", 0)
+                
+                items_data = body.get("items", [])
+                if isinstance(items_data, dict):
+                    items = items_data.get("item", [])
+                else:
+                    items = items_data
+                if not isinstance(items, list):
+                    items = [items] if items else []
+                    
+                if not items:
+                    break
+                    
+                all_items.extend(items)
+                
+                # 전체 개수에 도달했거나 더 이상 없으면 탈출
+                if len(all_items) >= total_count or len(items) < num_of_rows:
+                    break
+                page_no += 1
             
-        return items
-    except Exception as e:
-        print("API 호출 오류:", e)
-        return []
+            print(f"API 수집 완료: 총 {len(all_items)}개 발주계획 확인")
+            return all_items
+            
+        except Exception as e:
+            print(f"통신 오류 발생 (시도 {attempt + 1}/3): {e}")
+            time.sleep(5)
+            
+    return []
 
 def main_once():
     # 한국 시간(KST) 기준 로그 출력
@@ -141,4 +166,3 @@ def main_once():
 
 if __name__ == "__main__":
     main_once()
-# 봇 활성화 체크 (스케줄러 갱신)
